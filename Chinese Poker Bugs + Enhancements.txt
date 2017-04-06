@@ -1,0 +1,17 @@
+---Simulation---
+Simulation progress bar/pause
+Simulate a single stacked hand, multiple builds
+Simulate different brains against each other
+
+---GUI---
+Double Clicking
+Draw a box to select
+Drag/Drop a contiguous selection
+Use numbers to assign the selection
+Use a cursor/selected slot to send cards to
+
+---Misc Enhancements---
+Saved scores by player
+
+---Bugs---
+Sometimes Cntl stops working
