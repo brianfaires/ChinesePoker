@@ -1,0 +1,5 @@
+*.suo
+*.tlog
+Debug/
+*.aps
+*.user

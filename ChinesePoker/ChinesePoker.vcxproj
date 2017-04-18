@@ -212,10 +212,9 @@
     <ClInclude Include="Dealer.h" />
     <ClInclude Include="Deck.h" />
     <ClInclude Include="Form1.h">
-      <FileType>CppForm</FileType>
+      <FileType>CppHeader</FileType>
     </ClInclude>
     <ClInclude Include="Keyboard.h" />
-    <ClInclude Include="resource.h" />
     <ClInclude Include="SimForm.h">
       <FileType>CppForm</FileType>
     </ClInclude>
@@ -224,7 +223,7 @@
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="Form1.resX">
-      <FileType>CppForm</FileType>
+      <FileType>Resx</FileType>
     </EmbeddedResource>
     <EmbeddedResource Include="SimForm.resx">
       <DependentUpon>SimForm.h</DependentUpon>
@@ -232,10 +231,6 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="app.ico" />
-    <None Include="ClassDiagram1.cd" />
-  </ItemGroup>
-  <ItemGroup>
-    <ResourceCompile Include="app.rc" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

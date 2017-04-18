@@ -46,106 +46,98 @@ bool Brain::IsValid(array<int> ^first, array<int> ^small, array<int> ^last)
 
 	float smallValue;
 
-	// Check small hand vs middle hand
+	// Check small hand vs middle hand; begin by mapping the 3-card hand to a 5-card rank
 	int r10 = RANK(small[0]);
 	int r11 = RANK(small[1]);
 	int r12 = RANK(small[2]);
 
-	switch(r10)
-	{
-	case(0):
-		switch(r11)
-		{
+	switch(r10) {
 		case(0):
-			switch(r12)
-			{
+			switch(r11) {
 				case(0):
-					smallValue = dbHigh->Middle->Other[0,0,0,1,2];
+					switch(r12) {
+						case(0):
+							smallValue = dbHigh->Middle->Other[0,0,0,1,2];
+							break;
+						case(1):
+						case(2):
+							smallValue = dbHigh->Middle->Other[0,0,1,2,3];
+							break;
+						default:
+							smallValue = dbHigh->Middle->Other[0,0,1,2,r12];
+					}
 					break;
 				case(1):
-				case(2):
-					smallValue = dbHigh->Middle->Other[0,0,1,2,3];
+					switch(r12) {
+						case(1):
+							smallValue = dbHigh->Middle->Other[0,1,1,2,3];
+							break;
+						case(2):
+						case(3):
+						case(4):
+							smallValue = 0;
+							break;
+						default:
+							smallValue = dbHigh->Middle->Other[0,1,2,3,r12];
+					}
 					break;
+				case(2):
+					switch(r12) {
+						case(2):
+							smallValue = dbHigh->Middle->Other[0,1,2,2,3];
+							break;
+						case(3):
+						case(4):
+							smallValue = 0;
+							break;
+						default:
+							smallValue = dbHigh->Middle->Other[0,1,2,3,r12];
+					}
+					break;
+				case(3):
+					if(r12==4) {
+						smallValue = 0;
+						break;
+					}
 				default:
-					smallValue = dbHigh->Middle->Other[0,0,1,2,r12];
+					smallValue = dbHigh->Middle->Other[0,1,2,r11,r12];
 			}
 			break;
 		case(1):
-			switch(r12)
-			{
-			case(1):
-				smallValue = dbHigh->Middle->Other[0,1,1,2,3];
-				break;
-			case(2):
-			case(3):
-			case(4):
-				smallValue = 0;
-				break;
-			default:
-				smallValue = dbHigh->Middle->Other[0,1,2,3,r12];
+			switch(r11) {
+				case(1):
+					if(r12==1)
+						smallValue = dbHigh->Middle->Other[0,1,1,1,2];
+					else if(r12 == 2)
+						smallValue = dbHigh->Middle->Other[0,1,1,2,3];
+					else
+						smallValue = dbHigh->Middle->Other[0,1,1,2,r12];
+					break;
+				case(2):
+					if(r12==2)
+						smallValue = dbHigh->Middle->Other[0,1,2,2,3];
+					else if(r12 < 5)
+						smallValue = 0;
+					else
+						smallValue = dbHigh->Middle->Other[0,1,2,3,r12];
+					break;
+				case(3):
+					if(r12==4)
+						smallValue = 0;
+					else
+						smallValue = dbHigh->Middle->Other[0,1,2,3,r12];
+					break;					
+				default:
+					smallValue = dbHigh->Middle->Other[0,1,2,r11,r12];
 			}
 			break;
 		case(2):
-			switch(r12)
-			{
-			case(2):
-				smallValue = dbHigh->Middle->Other[0,1,2,2,3];
-				break;
-			case(3):
-			case(4):
-				smallValue = 0;
-				break;
-			default:
-				smallValue = dbHigh->Middle->Other[0,1,2,3,r12];
-			}
-			break;
-		case(3):
-			if(r12==4)
-			{
+			if(r11==3 && r12==4) {
 				smallValue = 0;
 				break;
 			}
 		default:
-			smallValue = dbHigh->Middle->Other[0,1,2,r11,r12];
-		}
-		break;
-	case(1):
-		switch(r11)
-		{
-		case(1):
-			if(r12==1)
-				smallValue = dbHigh->Middle->Other[0,1,1,1,2];
-			else if(r12 == 2)
-				smallValue = dbHigh->Middle->Other[0,1,1,2,3];
-			else
-				smallValue = dbHigh->Middle->Other[0,1,1,2,r12];
-			break;
-		case(2):
-			if(r12==2)
-				smallValue = dbHigh->Middle->Other[0,1,2,2,3];
-			else if(r12 < 5)
-				smallValue = 0;
-			else
-				smallValue = dbHigh->Middle->Other[0,1,2,3,r12];
-			break;
-		case(3):
-			if(r12==4)
-				smallValue = 0;
-			else
-				smallValue = dbHigh->Middle->Other[0,1,2,3,r12];
-			break;					
-		default:
-			smallValue = dbHigh->Middle->Other[0,1,2,r11,r12];
-		}
-		break;
-	case(2):
-		if(r11==3 && r12==4)
-		{
-			smallValue = 0;
-			break;
-		}
-	default:
-		smallValue = dbHigh->Middle->Other[0,1,r10,r11,r12];
+			smallValue = dbHigh->Middle->Other[0,1,r10,r11,r12];
 	}
 
 	return smallValue <= Evaluate(true, false, first[0], first[1], first[2], first[3], first[4]);
@@ -153,107 +145,100 @@ bool Brain::IsValid(array<int> ^first, array<int> ^small, array<int> ^last)
 
 bool Brain::IsValid(array<int> ^first, array<int> ^small)
 {
+	// A smaller version for when treating middle hand as a low hand (players may play incorrectly if they wish, it will only penalize them)
 	float smallValue;
 
 	int r10 = RANK(small[0]);
 	int r11 = RANK(small[1]);
 	int r12 = RANK(small[2]);
 
-	switch(r10)
-	{
-	case(0):
-		switch(r11)
-		{
+	switch(r10) {
 		case(0):
-			switch(r12)
-			{
+			switch(r11) {
 				case(0):
-					smallValue = dbLow->High->Other[0,0,0,1,2];
+					switch(r12){
+						case(0):
+							smallValue = dbLow->High->Other[0,0,0,1,2];
+							break;
+						case(1):
+						case(2):
+							smallValue = dbLow->High->Other[0,0,1,2,3];
+							break;
+						default:
+							smallValue = dbLow->High->Other[0,0,1,2,r12];
+					}
 					break;
 				case(1):
-				case(2):
-					smallValue = dbLow->High->Other[0,0,1,2,3];
+					switch(r12) {
+						case(1):
+							smallValue = dbLow->High->Other[0,1,1,2,3];
+							break;
+						case(2):
+						case(3):
+						case(4):
+							smallValue = 0;
+							break;
+						default:
+							smallValue = dbLow->High->Other[0,1,2,3,r12];
+					}
 					break;
+				case(2):
+					switch(r12) {
+						case(2):
+							smallValue = dbLow->High->Other[0,1,2,2,3];
+							break;
+						case(3):
+						case(4):
+							smallValue = 0;
+							break;
+						default:
+							smallValue = dbLow->High->Other[0,1,2,3,r12];
+					}
+					break;
+				case(3):
+					if(r12==4) {
+						smallValue = 0;
+						break;
+					}
 				default:
-					smallValue = dbLow->High->Other[0,0,1,2,r12];
+					smallValue = dbLow->High->Other[0,1,2,r11,r12];
 			}
 			break;
 		case(1):
-			switch(r12)
-			{
-			case(1):
-				smallValue = dbLow->High->Other[0,1,1,2,3];
-				break;
-			case(2):
-			case(3):
-			case(4):
-				smallValue = 0;
-				break;
-			default:
-				smallValue = dbLow->High->Other[0,1,2,3,r12];
+			switch(r11) {
+				case(1):
+					if(r12==1)
+						smallValue = dbLow->High->Other[0,1,1,1,2];
+					else if(r12 == 2)
+						smallValue = dbLow->High->Other[0,1,1,2,3];
+					else
+						smallValue = dbLow->High->Other[0,1,1,2,r12];
+					break;
+				case(2):
+					if(r12==2)
+						smallValue = dbLow->High->Other[0,1,2,2,3];
+					else if(r12 < 5)
+						smallValue = 0;
+					else
+						smallValue = dbLow->High->Other[0,1,2,3,r12];
+					break;
+				case(3):
+					if(r12==4)
+						smallValue = 0;
+					else
+						smallValue = dbLow->High->Other[0,1,2,3,r12];
+					break;					
+				default:
+					smallValue = dbLow->High->Other[0,1,2,r11,r12];
 			}
 			break;
 		case(2):
-			switch(r12)
-			{
-			case(2):
-				smallValue = dbLow->High->Other[0,1,2,2,3];
-				break;
-			case(3):
-			case(4):
-				smallValue = 0;
-				break;
-			default:
-				smallValue = dbLow->High->Other[0,1,2,3,r12];
-			}
-			break;
-		case(3):
-			if(r12==4)
-			{
+			if(r11==3 && r12==4) {
 				smallValue = 0;
 				break;
 			}
 		default:
-			smallValue = dbLow->High->Other[0,1,2,r11,r12];
-		}
-		break;
-	case(1):
-		switch(r11)
-		{
-		case(1):
-			if(r12==1)
-				smallValue = dbLow->High->Other[0,1,1,1,2];
-			else if(r12 == 2)
-				smallValue = dbLow->High->Other[0,1,1,2,3];
-			else
-				smallValue = dbLow->High->Other[0,1,1,2,r12];
-			break;
-		case(2):
-			if(r12==2)
-				smallValue = dbLow->High->Other[0,1,2,2,3];
-			else if(r12 < 5)
-				smallValue = 0;
-			else
-				smallValue = dbLow->High->Other[0,1,2,3,r12];
-			break;
-		case(3):
-			if(r12==4)
-				smallValue = 0;
-			else
-				smallValue = dbLow->High->Other[0,1,2,3,r12];
-			break;					
-		default:
-			smallValue = dbLow->High->Other[0,1,2,r11,r12];
-		}
-		break;
-	case(2):
-		if(r11==3 && r12==4)
-		{
-			smallValue = 0;
-			break;
-		}
-	default:
-		smallValue = dbLow->High->Other[0,1,r10,r11,r12];
+			smallValue = dbLow->High->Other[0,1,r10,r11,r12];
 	}
 	
 	return smallValue <= Evaluate(false, true, first[0], first[1], first[2], first[3], first[4]);
@@ -261,6 +246,7 @@ bool Brain::IsValid(array<int> ^first, array<int> ^small)
 
 void Brain::SolveHand(bool isHighGame, Deck ^deck, int handIndex)
 {
+	// TO DO: Wow. This function really needs to be refactored. First to-do if this is ever revisited.
 	// This function assumes all sub-hands to be sorted
 	//
 	int startIndex = handIndex * 13;
@@ -275,24 +261,23 @@ void Brain::SolveHand(bool isHighGame, Deck ^deck, int handIndex)
 	array<bool> ^dirtyInner = gcnew array<bool>(8);
 	array<int> ^clean = gcnew array<int>(8);
 
-	for(int a = startIndex; a < startIndex+9; a++)
-	{
+	for(int a = startIndex; a < startIndex+9; a++) {
 		dirtyOuter[a] = true;
 		firstHandArray[0] = deck[a];
-		for(int b = a + 1; b < startIndex+10; b++)
-		{
+
+		for(int b = a + 1; b < startIndex+10; b++) {
 			dirtyOuter[b] = true;
 			firstHandArray[1] = deck[b];
-			for(int c = b + 1; c < startIndex+11; c++)
-			{
+
+			for(int c = b + 1; c < startIndex+11; c++) {
 				dirtyOuter[c] = true;
 				firstHandArray[2] = deck[c];
-				for(int d = c + 1; d < startIndex+12; d++)
-				{
+
+				for(int d = c + 1; d < startIndex+12; d++) {
 					dirtyOuter[d] = true;
 					firstHandArray[3] = deck[d];
-					for(int e = d + 1; e < startIndex+13; e++)
-					{
+
+					for(int e = d + 1; e < startIndex+13; e++) {
 						dirtyOuter[e] = true;
 						firstHandArray[4] = deck[e];
 
@@ -304,23 +289,19 @@ void Brain::SolveHand(bool isHighGame, Deck ^deck, int handIndex)
 							if(!dirtyOuter[i])
 								clean[cleanIndex++] = deck[i];
 
-						for(int i = 0; i < 6; i++)
-						{
+						for(int i = 0; i < 6; i++) {
 							dirtyInner[i] = true;
 							smallHandArray[0] = clean[i];
-							for(int j = i + 1; j < 7; j++)
-							{
+							for(int j = i + 1; j < 7; j++) {
 								dirtyInner[j] = true;
 								smallHandArray[1] = clean[j];
-								for(int k = j + 1; k < 8; k++)
-								{
+								for(int k = j + 1; k < 8; k++) {
 									dirtyInner[k] = true;
 									smallHandArray[2] = clean[k];
 
 									// We now have the small hand, and the middle hand is implicit
 									int midCounter = 0;
-									for(int midIndex = 0; midCounter != 5; midIndex++)
-									{
+									for(int midIndex = 0; midCounter != 5; midIndex++) {
 										if(!dirtyInner[midIndex])
 											lastHandArray[midCounter++] = clean[midIndex];
 									}
@@ -329,40 +310,24 @@ void Brain::SolveHand(bool isHighGame, Deck ^deck, int handIndex)
 									float valueL = Evaluate(isHighGame, isHighGame, lastHandArray[0], lastHandArray[1], lastHandArray[2], lastHandArray[3], lastHandArray[4]);
 									float myScore = valueF + valueL + valueS;
 
-									if(myScore > topScore)
-									{
+									if(myScore > topScore) {
 										if((!isHighGame && IsValid(firstHandArray, smallHandArray)) || 
-										  (isHighGame && IsValid(firstHandArray, smallHandArray, lastHandArray)))
-										{
+										  (isHighGame && IsValid(firstHandArray, smallHandArray, lastHandArray))) {
 											topScore = myScore;
 											bestHand[10] = smallHandArray[0];									
 											bestHand[11] = smallHandArray[1];									
 											bestHand[12] = smallHandArray[2];									
-											if(isHighGame)
-											{
-												bestHand[0] = lastHandArray[0];									
-												bestHand[1] = lastHandArray[1];									
-												bestHand[2] = lastHandArray[2];									
-												bestHand[3] = lastHandArray[3];									
-												bestHand[4] = lastHandArray[4];									
-												bestHand[5] = firstHandArray[0];									
-												bestHand[6] = firstHandArray[1];									
-												bestHand[7] = firstHandArray[2];									
-												bestHand[8] = firstHandArray[3];									
-												bestHand[9] = firstHandArray[4];
+											if(isHighGame) {
+												for(int handIndex = 0; handIndex < 5; handIndex++) {
+													bestHand[handIndex] = lastHandArray[handIndex];	
+													bestHand[handIndex + 4] = firstHandArray[handIndex];
+												}
 											}
-											else
-											{
-												bestHand[0] = firstHandArray[0];									
-												bestHand[1] = firstHandArray[1];									
-												bestHand[2] = firstHandArray[2];									
-												bestHand[3] = firstHandArray[3];									
-												bestHand[4] = firstHandArray[4];									
-												bestHand[5] = lastHandArray[0];									
-												bestHand[6] = lastHandArray[1];									
-												bestHand[7] = lastHandArray[2];									
-												bestHand[8] = lastHandArray[3];									
-												bestHand[9] = lastHandArray[4];
+											else {
+												for(int handIndex = 0; handIndex < 5; handIndex++) {
+													bestHand[handIndex] = firstHandArray[handIndex];	
+													bestHand[handIndex + 4] = lastHandArray[handIndex];
+												}
 											}
 										}
 									}
@@ -384,8 +349,7 @@ void Brain::SolveHand(bool isHighGame, Deck ^deck, int handIndex)
 	}
 
 	// Organize the hand to equal the best permutation
-	if(bestHand[0] != 0 || bestHand[1] != 0)
-	{
+	if(bestHand[0] != 0 || bestHand[1] != 0) {
 		for(int i = 0; i < 13; i++)
 			deck->cards[i + startIndex] = bestHand[i];
 	}
@@ -1585,1311 +1549,3 @@ void Brain::Learn(void)
 		lowerHandsLM += curHandsLM;
 	}
 }
-
-#pragma region Antiquated
-/*
-	Old SolveAll() / AKA SimHand()
-{
-	int size = deck->size;
-	Database ^db = brain->db;
-
-	int firstHand, lastHand;
-	array<float,3> ^smallHand;
-	if(generalHandType==HIGH)
-	{
-		firstHand = HM;
-		lastHand = HH;
-		smallHand = db->HS_All;
-	}
-	else
-	{
-		firstHand = LH;
-		lastHand = LM;
-		smallHand = db->LS_All;
-	}
-
-	float maxSmallHand = 1;
-	array<int> ^bestHand = gcnew array<int>(13);
-	array<int> ^firstHandArray = gcnew array<int>(5);
-	array<int> ^lastHandArray = gcnew array<int>(5);
-	array<int> ^smallHandArray = gcnew array<int>(3);
-
-	array<bool> ^dirtyOuter = gcnew array<bool>(size);
-	array<bool> ^dirtyInner = gcnew array<bool>(8);
-	array<int> ^clean = gcnew array<int>(8);
-	
-	for(int startIndex = 0; startIndex < size; startIndex += 13)
-	{
-		float topScore=0;
-		for(int a = startIndex; a < startIndex+9; a++)
-		{
-			dirtyOuter[a] = true;
-			firstHandArray[0] = deck[a];
-			for(int b = a + 1; b < startIndex+10; b++)
-			{
-				dirtyOuter[b] = true;
-				firstHandArray[1] = deck[b];
-				for(int c = b + 1; c < startIndex+11; c++)
-				{
-					dirtyOuter[c] = true;
-					firstHandArray[2] = deck[c];
-					for(int d = c + 1; d < startIndex+12; d++)
-					{
-						dirtyOuter[d] = true;
-						firstHandArray[3] = deck[d];
-						for(int e = d + 1; e < startIndex+13; e++)
-						{
-							dirtyOuter[e] = true;
-							firstHandArray[4] = deck[e];
-							
-							#pragma region Evaluate(firstHand)
-							float valueF;
-
-							int rankF0 = RANK(firstHandArray[0]);
-							int rankF1 = RANK(firstHandArray[1]);
-							int rankF2 = RANK(firstHandArray[2]);
-							int rankF3 = RANK(firstHandArray[3]);
-							int rankF4 = RANK(firstHandArray[4]);
-							
-							// Flush
-							if((firstHandArray[0] & firstHandArray[1] & firstHandArray[2] & firstHandArray[3] & firstHandArray[4] & 0xF) != 0)
-							{
-								if((rankF1 + 1 == rankF2) && (rankF2 + 1 == rankF3) && (rankF3 + 1 == rankF4) && ((rankF0 + 1 == rankF1) || (rankF0 == 12 && rankF1 == 0)))
-								{
-									valueF = db->HandLookup(firstHand, STRAIGHT_FLUSH, rankF0, 0, 0, 0, 0);
-								}
-								else
-								{
-									valueF = db->HandLookup(firstHand, FLUSH, rankF4, rankF3, rankF2, rankF1, rankF0);
-								}
-							}
-							else if(brain->isUnique[(firstHandArray[0] | firstHandArray[1] | firstHandArray[2] | firstHandArray[3] | firstHandArray[4]) >> 10])
-							{
-								// if 5 bits are high, all cards are unique by rank and hand is straight or high card
-								if((rankF1 + 1 == rankF2) && (rankF2 + 1 == rankF3) && (rankF3 + 1 == rankF4) && ((rankF0 + 1 == rankF1) || (rankF0 == 12 && rankF1 == 0)))
-								{
-									valueF = db->HandLookup(firstHand, STRAIGHT, rankF0, 0, 0, 0, 0);
-								}
-								else
-								{
-									valueF = db->HandLookup(firstHand, HIGH_CARD, rankF4, rankF3, rankF2, rankF1, rankF0);
-									maxSmallHand = smallHand[rankF4, rankF3, rankF2];
-								}
-							}
-							else
-							{
-								// Paired hand
-								bool pair01 = (rankF0 == rankF1);
-								bool pair12 = (rankF1 == rankF2);
-								bool pair23 = (rankF2 == rankF3);
-								bool pair34 = (rankF3 == rankF4);
-								
-								if(pair01)
-								{
-									if(pair23) // Check for 2 pair or quads first because it allows an early exit
-									{
-										if(pair34)
-											valueF = db->HandLookup(firstHand, FULL_HOUSE, rankF3, 0, 0, 0, 0);
-										else if(pair12)
-											valueF = db->HandLookup(firstHand, QUADS, rankF0, 0, 0, 0, 0);
-										else
-										{
-											valueF = db->HandLookup(firstHand, TWO_PAIR, rankF2, rankF0, rankF4, 0, 0);
-											maxSmallHand = smallHand[12,12,11];
-										}
-									}
-									else if(pair34)
-									{
-										if(pair12)
-										{
-											valueF = db->HandLookup(firstHand, FULL_HOUSE, rankF0, 0, 0, 0, 0);
-										}
-										else
-										{
-											valueF = db->HandLookup(firstHand, TWO_PAIR, rankF4, rankF0, rankF2, 0, 0);
-											maxSmallHand = smallHand[12,12,11];
-										}
-									}
-									else if(pair12)
-									{
-										valueF = db->HandLookup(firstHand, TRIPS, rankF0, 0, 0, 0, 0);
-										maxSmallHand = smallHand[rankF0,rankF0,rankF0];
-									}
-									else
-									{
-										valueF = db->HandLookup(firstHand, PAIR, rankF0, rankF4, rankF3, rankF2, 0);
-										maxSmallHand = smallHand[rankF4,rankF0,rankF0];
-									}
-								}
-								else if(pair12)
-								{
-									if(pair34)
-									{
-										if(pair23)
-											valueF = db->HandLookup(firstHand, QUADS, rankF1, 0, 0, 0, 0);
-										else
-										{
-											valueF = db->HandLookup(firstHand, TWO_PAIR, rankF3, rankF1, rankF0, 0, 0);
-											maxSmallHand = smallHand[12,12,11];
-										}
-									}
-									else if(pair23)
-									{
-										valueF = db->HandLookup(firstHand, TRIPS, rankF1, 0, 0, 0, 0);
-										maxSmallHand = smallHand[rankF1,rankF1,rankF1];
-									}
-									else
-									{
-										valueF = db->HandLookup(firstHand, PAIR, rankF1, rankF4, rankF3, rankF0, 0);
-										maxSmallHand = smallHand[rankF4,rankF1,rankF1];
-									}
-								}
-								else if(pair23)
-								{
-									if(pair34)
-									{
-										valueF = db->HandLookup(firstHand, TRIPS, rankF2, 0, 0, 0, 0);
-										maxSmallHand = smallHand[rankF2,rankF2,rankF2];
-									}
-									else
-									{
-										valueF = db->HandLookup(firstHand, PAIR, rankF2, rankF4, rankF1, rankF0, 0);
-										maxSmallHand = smallHand[rankF4,rankF2,rankF2];
-									}
-								}
-								else 
-								{
-									valueF = db->HandLookup(firstHand, PAIR, rankF3, rankF2, rankF1, rankF0, 0);
-									maxSmallHand = smallHand[rankF3,rankF3,rankF2];
-								}
-							}
-							/*
-							//-------------Begin Evaluate(firstHand)------------------
-							//
-							float valueF;
-							int rank0 = RANK(firstHandArray[0]);
-							int rank1 = RANK(firstHandArray[1]);
-							int rank2 = RANK(firstHandArray[2]);
-							int rank3 = RANK(firstHandArray[3]);
-							int rank4 = RANK(firstHandArray[4]);
-							
-							// Pair
-							if(rank0 == rank1)
-							{
-								if(rank2 == rank3)
-								{
-									if(rank1 == rank2)
-									{
-										valueF = db->HandLookup(firstHand, QUADS, rank2, 0, 0, 0, 0);
-										maxSmallHand = 1;
-									}
-									else if(rank3 == rank4)
-									{
-										valueF = db->HandLookup(firstHand, FULL_HOUSE, rank3, 0, 0, 0, 0);
-										maxSmallHand = 1;
-									}
-									else
-									{
-										valueF = db->HandLookup(firstHand, TWO_PAIR, rank2, rank0, rank4, 0, 0);
-										maxSmallHand = db->LS_All[12,12,11];
-									}
-								}
-								else if(rank3 == rank4)
-								{
-									if(rank1 == rank2)
-									{
-										valueF = db->HandLookup(firstHand, FULL_HOUSE, rank2, 0, 0, 0, 0);
-										maxSmallHand = 1;
-									}
-									else 
-									{
-										valueF = db->HandLookup(firstHand, TWO_PAIR, rank4, rank0, rank2, 0, 0);
-										maxSmallHand = db->LS_All[12,12,11];
-									}
-								}
-								else if(rank1 == rank2)
-								{
-									valueF = db->HandLookup(firstHand, TRIPS, rank0, 0, 0, 0, 0);
-									maxSmallHand = db->LS_All[rank0,rank0,rank0];
-								}
-								else
-								{
-									valueF = db->HandLookup(firstHand, PAIR, rank0, rank4, rank3, rank2, 0);
-									maxSmallHand = db->LS_All[rank0,rank0,rank4];
-								}
-							}
-							else if(rank1 == rank2)
-							{
-								if(rank3 == rank4)
-								{
-									if(rank2 == rank3)
-									{
-										valueF = db->HandLookup(firstHand, QUADS, rank1, 0, 0, 0, 0);
-										maxSmallHand = 1;
-									}
-									else
-									{
-										valueF = db->HandLookup(firstHand, TWO_PAIR, rank3, rank1, rank0, 0, 0);
-										maxSmallHand = db->LS_All[12,12,11];
-									}
-								}
-								else if(rank2 == rank3)
-								{
-									valueF = db->HandLookup(firstHand, TRIPS, rank1, 0, 0, 0, 0);
-									maxSmallHand = db->LS_All[rank1,rank1,rank1];
-								}
-								else
-								{
-									valueF = db->HandLookup(firstHand, PAIR, rank1, rank4, rank3, rank0, 0);
-									maxSmallHand = db->LS_All[rank4,rank1,rank1];
-								}
-							}
-							else if(rank2 == rank3)
-							{
-								if(rank4 == rank3)
-								{
-									valueF = db->HandLookup(firstHand, TRIPS, rank2, 0, 0, 0, 0);
-									maxSmallHand = db->LS_All[rank2,rank2,rank2];
-								}
-								else
-								{
-									valueF = db->HandLookup(firstHand, PAIR, rank2, rank4, rank1, rank0, 0);
-									maxSmallHand = db->LS_All[rank4,rank2,rank2];
-								}
-							}
-							else if(rank3 == rank4)
-							{
-								valueF = db->HandLookup(firstHand, PAIR, rank3, rank2, rank1, rank0, 0);
-								maxSmallHand = db->LS_All[rank3,rank3,rank2];
-							}
-							// No pairs
-							else if((rank1 + 1 == rank2) && (rank2 + 1 == rank3) && (rank3 + 1 == rank4) && ((rank0 + 1 == rank1) || (rank0 == 12 && rank1 == 0)))
-							{
-								// Straight
-								if((firstHandArray[0] & firstHandArray[1] & firstHandArray[2] & firstHandArray[3] & firstHandArray[4] & 0xF) != 0)
-								{
-									valueF = db->HandLookup(firstHand, STRAIGHT_FLUSH, rank0, 0, 0, 0, 0);
-									maxSmallHand = 1;
-								}
-								else
-								{
-									valueF = db->HandLookup(firstHand, STRAIGHT, rank0, 0, 0, 0, 0);
-									maxSmallHand = 1;
-								}
-							}
-							else if((firstHandArray[0] & firstHandArray[1] & firstHandArray[2] & firstHandArray[3] & firstHandArray[4] & 0xF) != 0)
-							{
-								valueF = db->HandLookup(firstHand, FLUSH, rank4, rank3, rank2, rank1, rank0);
-								maxSmallHand = 1;
-							}
-							else
-							{
-								valueF = db->HandLookup(firstHand, HIGH_CARD, rank4, rank3, rank2, rank1, rank0);
-								maxSmallHand = db->LS_All[rank4,rank3,rank2];
-							}
-							//--------------End Evaluate(firstHand)-------------------
-#pragma endregion
-
-							// We have picked the first hand, the hand that forces the maximum small hand value. Copy the remaining values into clean[] and continue iterating through that
-							int cleanIndex=0;
-							for(int ind=startIndex; cleanIndex < 8; ind++)
-							{
-								if(!dirtyOuter[ind])
-									clean[cleanIndex++] = deck[ind];
-							}			
-
-							for(int i = 0; i < 6; i++)
-							{
-								dirtyInner[i] = true;
-								smallHandArray[0] = clean[i];
-								for(int j = i + 1; j < 7; j++)
-								{
-									dirtyInner[j] = true;
-									smallHandArray[1] = clean[j];
-									for(int k = j + 1; k < 8; k++)
-									{
-										smallHandArray[2] = clean[k];
-										// We now have the small hand
-										#pragma region Evaluate(SmallHand)
-										//-------------Begin Evaluate(SmallHand)------------------
-										float valueS;
-										if(generalHandType == HIGH)
-										{
-											valueS = db->HS_All[RANK(smallHandArray[0]), RANK(smallHandArray[1]), RANK(smallHandArray[2])];
-										}
-										else
-										{
-											valueS = db->LS_All[RANK(smallHandArray[0]), RANK(smallHandArray[1]), RANK(smallHandArray[2])];
-										}
-										//--------------End Evaluate(SmallHand)-------------------
-										#pragma endregion
-
-										// Check hand legality
-										if(valueS > maxSmallHand)
-											continue;
-
-										dirtyInner[k] = true; // These are usually at the start of the loop, but not this one because of previous continues				
-										// The middle hand is implicit from the dirty bits
-										int midCounter = 0;
-										for(int midIndex = 0; midCounter != 5; midIndex++)
-										{
-											if(!dirtyInner[midIndex])
-												lastHandArray[midCounter++] = clean[midIndex];
-										}
-										dirtyInner[k] = false; // This is usually at the end of a loop. Doing it here allows us to use 'continue's below.
-											
-										float value2;
-										#pragma region Evaluate(lastHand)
-										int rankL0 = RANK(lastHandArray[0]);
-										int rankL1 = RANK(lastHandArray[1]);
-										int rankL2 = RANK(lastHandArray[2]);
-										int rankL3 = RANK(lastHandArray[3]);
-										int rankL4 = RANK(lastHandArray[4]);
-										
-										// Flush
-										if((lastHandArray[0] & lastHandArray[1] & lastHandArray[2] & lastHandArray[3] & lastHandArray[4] & 0xF) != 0)
-										{
-											if((rankL1 + 1 == rankL2) && (rankL2 + 1 == rankL3) && (rankL3 + 1 == rankL4) && ((rankL0 + 1 == rankL1) || (rankL0 == 12 && rankL1 == 0)))
-											{
-												if(generalHandType==HIGH)
-												{
-													if(valueF > db->HM_Straight_Flush[rankL0])
-														continue;
-													else
-														value2 = db->HH_Straight_Flush[rankL0];
-												}
-												else 
-													value2 = db->LM_Straight_Flush[rankL0];
-											}
-											else
-											{
-												if(generalHandType==HIGH)
-												{
-													if(valueF > db->HM_Flush[rankL4-5][rankL3-3,rankL2-2,rankL1-1,rankL0])
-														continue;
-													else
-														value2 = db->HH_Flush[rankL4-5][rankL3-3,rankL2-2,rankL1-1,rankL0];
-												}
-												else
-													value2 = db->LM_Flush[rankL4-5][rankL3-3,rankL2-2,rankL1-1,rankL0];
-											}
-										}
-										else if(brain->isUnique[(lastHandArray[0] | lastHandArray[1] | lastHandArray[2] | lastHandArray[3] | lastHandArray[4]) >> 10])
-										{
-											// if 5 bits are high, all cards are unique by rank and hand is straight or high card
-											if((rankL1 + 1 == rankL2) && (rankL2 + 1 == rankL3) && (rankL3 + 1 == rankL4) && ((rankL0 + 1 == rankL1) || (rankL0 == 12 && rankL1 == 0)))
-											{
-												if(generalHandType==HIGH)
-												{
-													if(valueF > db->HM_Straight[rankL0])
-														continue;
-													else
-														value2 = db->HH_Straight[rankL0];
-												}
-												else
-													value2 = db->LM_Straight[rankL0];
-											}
-											else
-											{
-												if(generalHandType==HIGH)
-												{
-													if(valueF > db->HM_High_Card[rankL4-5][rankL3-3,rankL2-2,rankL1-1,rankL0])
-														continue;
-													else
-														value2 = db->HH_High_Card[rankL4-5][rankL3-3,rankL2-2,rankL1-1,rankL0];
-												}
-												else
-													value2 = db->LM_High_Card[rankL4-5][rankL3-3, rankL2-2, rankL1-1, rankL0];
-											}
-										}
-										else
-										{
-											// Paired hand
-											bool pair01 = (rankL0 == rankL1);
-											bool pair12 = (rankL1 == rankL2);
-											bool pair23 = (rankL2 == rankL3);
-											bool pair34 = (rankL3 == rankL4);
-											
-											if(pair01)
-											{
-												if(pair23) // Check for 2 pair or quads first because it allows an early exit
-												{
-													if(pair34)
-													{
-														if(generalHandType==HIGH)
-														{
-															if(valueF > db->HM_Full_House[rankL3])
-																continue;
-															else
-																value2 = db->HH_Full_House[rankL3];
-														}
-														else
-															value2 = db->LM_Full_House[rankL3];
-													}
-													else if(pair12)
-													{
-														if(generalHandType==HIGH)
-														{
-															if(valueF > db->HM_Quads[rankL0])
-																continue;
-															else
-																value2 = db->HH_Quads[rankL0];
-														}
-														else
-															value2 = db->LM_Quads[rankL0];
-													}
-													else
-													{
-														if(generalHandType==HIGH)
-														{
-															if(valueF > db->HM_Two_Pair[rankL2,rankL0,rankL4])
-																continue;
-															else
-																value2 = db->HH_Two_Pair[rankL2,rankL0,rankL4];
-														}
-														else
-															value2 = db->LM_Two_Pair[rankL2,rankL0,rankL4];
-													}
-												}
-												else if(pair34)
-												{
-													if(pair12)
-													{
-														if(generalHandType==HIGH)
-														{
-															if(valueF > db->HM_Full_House[rankL0])
-																continue;
-															else
-																value2 = db->HH_Full_House[rankL0];
-														}
-														else
-															value2 = db->LM_Full_House[rankL0];
-													}
-													else
-													{
-														if(generalHandType==HIGH)
-														{
-															if(valueF > db->HM_Two_Pair[rankL4,rankL0,rankL2])
-																continue;
-															else
-																value2 = db->HH_Two_Pair[rankL4,rankL0,rankL2];
-														}
-														else
-															value2 = db->LM_Two_Pair[rankL4,rankL0,rankL2];
-													}
-												}
-												else if(pair12)
-												{
-													if(generalHandType==HIGH)
-													{
-														if(valueF > db->HM_Trips[rankL0])
-															continue;
-														else
-															value2 = db->HH_Trips[rankL0];
-													}
-													else
-														value2 = db->LM_Trips[rankL0];
-												}
-												else
-												{
-													if(generalHandType==HIGH)
-													{
-														if(valueF > db->HM_Pair[rankL0,rankL4,rankL3,rankL2])
-															continue;
-														else
-															value2 = db->HH_Pair[rankL0,rankL4,rankL3,rankL2];
-													}
-													else
-														value2 = db->LM_Pair[rankL0,rankL4,rankL3,rankL2];
-												}
-											}
-											else if(pair12)
-											{
-												if(pair34)
-												{
-													if(pair23)
-													{
-														if(generalHandType==HIGH)
-														{
-															if(valueF > db->HM_Quads[rankL1])
-																continue;
-															else
-																value2 = db->HH_Quads[rankL1];
-														}
-														else
-															value2 = db->LM_Quads[rankL1];
-													}
-													else
-													{
-														if(generalHandType==HIGH)
-														{
-															if(valueF > db->HM_Two_Pair[rankL3,rankL1,rankL0])
-																continue;
-															else
-																value2 = db->HH_Two_Pair[rankL3,rankL1,rankL0];
-														}
-														else
-															value2 = db->LM_Two_Pair[rankL3,rankL1,rankL0];
-													}
-												}
-												else if(pair23)
-												{
-													if(generalHandType==HIGH)
-													{
-														if(valueF > db->HM_Trips[rankL1])
-															continue;
-														else
-															value2 = db->HH_Trips[rankL1];
-													}
-													else
-														value2 = db->LM_Trips[rankL1];
-												}
-												else
-												{
-													if(generalHandType==HIGH)
-													{
-														if(valueF > db->HM_Pair[rankL2,rankL4,rankL3,rankL0])
-															continue;
-														else
-															value2 = db->HH_Pair[rankL2,rankL4,rankL3,rankL0];
-													}
-													else
-														value2 = db->LM_Pair[rankL2,rankL4,rankL3,rankL0];
-												}
-											}
-											else if(pair23)
-											{
-												if(pair34)
-												{
-													if(generalHandType==HIGH)
-													{
-														if(valueF > db->HM_Trips[rankL2])
-															continue;
-														else
-															value2 = db->HH_Trips[rankL2];
-													}
-													else
-														value2 = db->LM_Trips[rankL2];
-												}
-												else
-												{
-													if(generalHandType==HIGH)
-													{
-														if(valueF > db->HM_Pair[rankL2,rankL4,rankL1,rankL0])
-															continue;
-														else
-															value2 = db->HH_Pair[rankL2,rankL4,rankL1,rankL0];
-													}
-													else
-														value2 = db->LM_Pair[rankL2,rankL4,rankL1,rankL0];
-												}
-											}
-											else 
-											{
-												if(generalHandType==HIGH)
-												{
-													if(valueF > db->HM_Pair[rankL3,rankL2,rankL1,rankL0])
-														continue;
-													else
-														value2 = db->HH_Pair[rankL3,rankL2,rankL1,rankL0];
-												}
-												else
-													value2 = db->LM_Pair[rankL3,rankL2,rankL1,rankL0];
-											}
-										}
-											
-										/*
-										//-------------Begin Evaluate(lastHand)------------------
-										int rankM0 = RANK(lastHandArray[0]);
-										int rankM1 = RANK(lastHandArray[1]);
-										int rankM2 = RANK(lastHandArray[2]);
-										int rankM3 = RANK(lastHandArray[3]);
-										int rankM4 = RANK(lastHandArray[4]);
-										
-										// Pair
-										if(rankM0 == rankM1)
-										{
-											if(rankM2 == rankM3)
-											{
-												if(rankM1 == rankM2)
-												{
-													if(generalHandType == HIGH)
-													{
-														if(valueF > db->HM_Quads[rankM0])
-															continue;
-														value2 = db->HH_Quads[rankM0];
-													}
-													else
-														value2 = db->LM_Quads[rankM0];
-												}
-												else if(rankM3 == rankM4)
-												{
-													if(generalHandType == HIGH)
-													{
-														if(valueF > db->HM_Full_House[rankM3])
-															continue;
-														value2 = db->HH_Full_House[rankM3];
-													}
-													else
-														value2 = db->LM_Full_House[rankM3];
-												}
-												else
-												{
-													if(generalHandType == HIGH)
-													{
-														if(valueF > db->HM_Two_Pair[rankM2,rankM0,rankM4])
-															continue;
-														value2 = db->HH_Two_Pair[rankM2,rankM0,rankM4];
-													}
-													else
-														value2 = db->LM_Two_Pair[rankM2,rankM0,rankM4];
-												}
-											}
-											else if(rankM3 == rankM4)
-											{
-												if(rankM1 == rankM2)
-												{
-													if(generalHandType == HIGH)
-													{
-														if(valueF > db->HM_Full_House[rankM0])
-															continue;
-														value2 = db->HH_Full_House[rankM0];
-													}
-													else
-														value2 = db->LM_Full_House[rankM0];
-												}
-												else 
-												{
-													if(generalHandType == HIGH)
-													{
-														if(valueF > db->HM_Two_Pair[rankM4,rankM0,rankM2])
-															continue;
-														value2 = db->HH_Two_Pair[rankM4,rankM0,rankM2];
-													}
-													else
-														value2 = db->LM_Two_Pair[rankM4,rankM0,rankM2];
-												}
-											}
-											else if(rankM1 == rankM2)
-											{
-												if(generalHandType == HIGH)
-												{
-													if(valueF > db->HM_Trips[rankM0])
-														continue;
-													value2 = db->HH_Trips[rankM0];
-												}
-												else
-													value2 = db->LM_Trips[rankM0];
-											}
-											else
-											{
-												if(generalHandType == HIGH)
-												{
-													if(valueF > db->HM_Pair[rankM0,rankM4,rankM3,rankM2])
-														continue;
-													value2 = db->HH_Pair[rankM0,rankM4,rankM3,rankM2];
-												}
-												else
-													value2 = db->LM_Pair[rankM0,rankM4,rankM3,rankM2];
-											}
-										}
-										else if(rankM1 == rankM2)
-										{
-											if(rankM3 == rankM4)
-											{
-												if(rankM2 == rankM3)
-												{
-													if(generalHandType == HIGH)
-													{
-														if(valueF > db->HM_Quads[rankM3])
-															continue;
-														value2 = db->HH_Quads[rankM3];
-													}
-													else
-														value2 = db->LM_Quads[rankM3];
-												}
-												else
-												{
-													if(generalHandType == HIGH)
-													{
-														if(valueF > db->HM_Two_Pair[rankM3,rankM1,rankM0])
-															continue;
-														value2 = db->HH_Two_Pair[rankM3,rankM1,rankM0];
-													}
-													else
-														value2 = db->LM_Two_Pair[rankM3,rankM1,rankM0];
-												}
-											}
-											else if(rankM2 == rankM3)
-											{
-												if(generalHandType == HIGH)
-												{
-													if(valueF > db->HM_Trips[rankM1])
-														continue;
-													value2 = db->HH_Trips[rankM1];
-												}
-												else
-													value2 = db->LM_Trips[rankM1];
-											}
-											else
-											{
-												if(generalHandType == HIGH)
-												{
-													if(valueF > db->HM_Pair[rankM1,rankM4,rankM3,rankM0])
-														continue;
-													value2 = db->HH_Pair[rankM1, rankM4, rankM3, rankM0];
-												}
-												else
-													value2 = db->LM_Pair[rankM1,rankM4,rankM3,rankM0];
-											}
-										}
-										else if(rankM2 == rankM3)
-										{
-											if(rankM4 == rankM3)
-											{
-												if(generalHandType == HIGH)
-												{
-													if(valueF > db->HM_Trips[rankM2])
-														continue;
-													value2 = db->HH_Trips[rankM2];
-												}
-												else
-													value2 = db->LM_Trips[rankM2];
-											}
-											else
-											{
-												if(generalHandType == HIGH)
-												{
-													if(valueF > db->HM_Pair[rankM2,rankM4,rankM1,rankM0])
-														continue;
-													value2 = db->HH_Pair[rankM2,rankM4,rankM1,rankM0];
-												}
-												else
-													value2 = db->LM_Pair[rankM2,rankM4,rankM1,rankM0];
-											}
-										}
-										else if(rankM3 == rankM4)
-										{
-											if(generalHandType == HIGH)
-											{
-												if(valueF > db->HM_Pair[rankM3,rankM2,rankM1,rankM0])
-													continue;
-												value2 = db->HH_Pair[rankM3,rankM2,rankM1,rankM0];
-											}
-											else
-												value2 = db->LM_Pair[rankM3,rankM2,rankM1,rankM0];
-										}
-										// No pairs
-										else if((rankM1 + 1 == rankM2) && (rankM2 + 1 == rankM3) && (rankM3 + 1 == rankM4) && ((rankM0 + 1 == rankM1) || (rankM0 == 12 && rankM1 == 0)))
-										{
-											// Straight
-											if((lastHandArray[0] & lastHandArray[1] & lastHandArray[2] & lastHandArray[3] & lastHandArray[4] & 0xF) != 0)
-											{
-												if(generalHandType == HIGH)
-												{
-													if(valueF > db->HM_Straight_Flush[rankM0])
-														continue;
-													value2 = db->HH_Straight_Flush[rankM0];
-												}
-												else
-													value2 = db->LM_Straight_Flush[rankM0];
-											}
-											else
-											{
-												if(generalHandType == HIGH)
-												{
-													if(valueF > db->HM_Straight[rankM0])
-														continue;
-													value2 = db->HH_Straight[rankM0];
-												}
-												else
-													value2 = db->LM_Straight[rankM0];
-											}
-										}
-										else if((lastHandArray[0] & lastHandArray[1] & lastHandArray[2] & lastHandArray[3] & lastHandArray[4] & 0xF) != 0)
-										{
-											if(generalHandType == HIGH)
-											{
-												if(valueF > db->HM_Flush[rankM4-5][rankM3-3,rankM2-2,rankM1-1,rankM0])
-													continue;
-												value2 = db->HH_Flush[rankM4-5][rankM3-3,rankM2-2,rankM1-1,rankM0];
-											}
-											else
-												value2 = db->LM_Flush[rankM4-5][rankM3-3,rankM2-2,rankM1-1,rankM0];
-										}
-										else
-										{
-											if(generalHandType == HIGH)
-											{
-												if(valueF > db->HM_High_Card[rankM4-5][rankM3-3,rankM2-2,rankM1-1,rankM0])
-													continue;
-												value2 = db->HH_High_Card[rankM4-5][rankM3-3,rankM2-2,rankM1-1,rankM0];
-											}
-											else
-												value2 = db->LM_High_Card[rankM4-5][rankM3-3,rankM2-2,rankM1-1,rankM0];
-										}
-										//--------------End Evaluate(midHand)-------------------
-										*
-										#pragma endregion
-
-										// Hand has already proven it is valid (IsValid() will return true)
-										float myScore = valueF + valueS + value2;
-										if(myScore > topScore)
-										{
-											#pragma region Set Top Score
-											topScore = myScore;
-											if(generalHandType == LOW)
-											{
-												bestHand[0] = firstHandArray[0];									
-												bestHand[1] = firstHandArray[1];									
-												bestHand[2] = firstHandArray[2];									
-												bestHand[3] = firstHandArray[3];									
-												bestHand[4] = firstHandArray[4];									
-												bestHand[5] = lastHandArray[0];									
-												bestHand[6] = lastHandArray[1];									
-												bestHand[7] = lastHandArray[2];									
-												bestHand[8] = lastHandArray[3];									
-												bestHand[9] = lastHandArray[4];									
-												bestHand[10] = smallHandArray[0];									
-												bestHand[11] = smallHandArray[1];									
-												bestHand[12] = smallHandArray[2];
-											}
-											else // generalHandType == HIGH
-											{
-												bestHand[0] = lastHandArray[0];									
-												bestHand[1] = lastHandArray[1];									
-												bestHand[2] = lastHandArray[2];									
-												bestHand[3] = lastHandArray[3];									
-												bestHand[4] = lastHandArray[4];									
-												bestHand[5] = firstHandArray[0];									
-												bestHand[6] = firstHandArray[1];									
-												bestHand[7] = firstHandArray[2];									
-												bestHand[8] = firstHandArray[3];									
-												bestHand[9] = firstHandArray[4];									
-												bestHand[10] = smallHandArray[0];									
-												bestHand[11] = smallHandArray[1];									
-												bestHand[12] = smallHandArray[2];
-											}
-#pragma endregion
-										}
-									}
-									dirtyInner[j] = false;
-								}
-								dirtyInner[i] = false;
-							}
-							dirtyOuter[e] = false;
-						}
-						dirtyOuter[d] = false;
-					}
-					dirtyOuter[c] = false;
-				}
-				dirtyOuter[b] = false;
-			}
-			dirtyOuter[a] = false;
-		}
-
-		// Organize the actual hand to equal the best permutation (assumes the same cards are in both arrays)
-		for(int i = 0; i < 13; i++)
-			deck->cards[i + startIndex] = bestHand[i];
-	}
-
-	delete bestHand;
-	delete firstHandArray;
-	delete lastHandArray;
-	delete smallHandArray;
-	delete dirtyOuter;
-	delete dirtyInner;
-}
-*/
-/*
-
-		// Check middle hand vs high hand
-		if(valH > db->HH_High_Card[7][8,8,8,7])
-		{
-			if(valM <= db->HM_High_Card[7][8,8,8,7])
-				return true;
-			if(valH > db->HH_Pair[12,11,10,9])
-			{
-				if(valM <= db->HM_Pair[12,11,10,9])
-					return true;						
-				if(valH > db->HH_Two_Pair[12,11,10])
-				{
-					if(valM <= db->HM_Two_Pair[12,11,10])
-						return true;
-					if(valH > db->HH_Trips[12])
-					{
-						if(valM <= db->HM_Trips[12])
-							return true;
-						if(valH > db->HH_Straight[8])
-						{
-							if(valM <= db->HM_Straight[8])
-								return true;
-							if(valH > db->HH_Flush[7][8,8,8,7])
-							{
-								if(valM <= db->HM_Flush[7][8,8,8,7])
-									return true;
-								if(valH > db->HH_Full_House[12])
-								{
-									if(valM <= db->HM_Full_House[12])
-										return true;
-									if(valH > db->HH_Quads[12])
-									{
-										if(valM <= db->HM_Quads[12])
-											return true;
-										// Both hands are Straight Flushes
-										return a >= f;
-									}
-									else if(valM > db->HM_Quads[12])
-										return false;
-									else
-										return b > g;
-								}
-								else if(valM > db->HM_Full_House[12])
-									return false;
-								else
-									return c > h;
-							}
-							else if(valM > db->HM_Flush[7][8,8,8,7])
-								return false;
-							else
-							{
-								if(RANK(e) > RANK(j)) return true;
-								if(RANK(j) > RANK(e)) return false;
-								if(RANK(d) > RANK(i)) return true;
-								if(RANK(i) > RANK(d)) return false;
-								if(RANK(c) > RANK(h)) return true;
-								if(RANK(h) > RANK(c)) return false;
-								if(RANK(b) > RANK(g)) return true;
-								if(RANK(g) > RANK(b)) return false;
-								return (RANK(a) >= RANK(f));
-							}
-						}
-						else if(valM > db->HM_Straight[8])
-							return false;
-						else
-							return RANK(a) > RANK(f);
-					}
-					else if(valM > db->HM_Trips[12])
-						return false;
-					else
-						return RANK(c) > RANK(h);
-				}
-				else if(valM > db->HM_Two_Pair[12,11,10])
-					return false;
-				else
-				{
-					if(RANK(d) > RANK(i)) return true;
-					if(RANK(i) > RANK(d)) return false;
-					if(RANK(b) > RANK(g)) return true;
-					if(RANK(g) > RANK(b)) return false;
-					if(RANK(e) > RANK(j)) return true;
-					if(RANK(j) > RANK(e)) return false;
-					if(RANK(c) > RANK(h)) return true;
-					if(RANK(h) > RANK(c)) return false;
-					return RANK(a) >= RANK(f);
-				}
-			}
-			if(valM > db->HM_Pair[12,11,10,9])
-				return false;
-			else
-			{
-				// Both hands are 1 pair
-				// Find pair values
-				int pairValue, pairValue2;
-				if(RANK(a) == RANK(b))
-				{
-					pairValue = a;
-				}
-				else if(RANK(b) == RANK(c))
-				{
-					pairValue = b;
-				}
-				else if(RANK(c) == RANK(d))
-				{
-					pairValue = c;
-				}
-				else // RANK(d) == RANK(e)
-				{
-					pairValue = d;
-				}
-
-				if(RANK(f) == RANK(g))
-				{
-					pairValue2 = f;
-				}
-				else if(RANK(g) == RANK(h))
-				{
-					pairValue2 = g;
-				}
-				else if(RANK(h) == RANK(i))
-				{
-					pairValue2 = h;
-				}
-				else //RANK(i) == RANK(j)
-				{
-					pairValue2 = i;
-				}
-
-				if(RANK(pairValue) < RANK(pairValue2))
-					return false;
-				if(RANK(pairValue) > RANK(pairValue2))
-					return true;
-				
-				// Pairs are the same value
-				if(RANK(e) > RANK(j))
-					return true;
-				if(RANK(j) > RANK(e))
-					return false;
-				if(RANK(d) > RANK(i))
-					return true;
-				if(RANK(i) > RANK(d))
-					return false;
-				if(RANK(c) > RANK(h))
-					return true;
-				if(RANK(h) > RANK(c))
-					return false;
-				if(RANK(b) > RANK(g))
-					return true;
-				if(RANK(g) > RANK(b))
-					return false;
-				return RANK(a) >= RANK(f);
-			}
-		}
-		else if(valM > db->HM_High_Card[7][8,8,8,7])
-			return false;
-		else
-		{
-			// Both hands are high cards only
-			if(RANK(e) > RANK(j))
-				return true;
-			if(RANK(j) > RANK(e))
-				return false;
-			if(RANK(d) > RANK(i))
-				return true;
-			if(RANK(i) > RANK(d))
-				return false;
-			if(RANK(c) > RANK(h))
-				return true;
-			if(RANK(h) > RANK(c))
-				return false;
-			if(RANK(b) > RANK(g))
-				return true;
-			if(RANK(g) > RANK(b))
-				return false;
-			return RANK(a) >= RANK(f);
-		}
-	}
-*/
-/*	else if(isUnique[(c0 | c1 | c2 | c3 | c4) >> 10])
-	{
-		returnValue = data->High_Card[rank4][rank3,rank2,rank1,rank0];
-	}
-	else
-	{
-		// Paired hand, max of 4 comparisons and 1 array lookup
-		if((rank0 == rank1)
-		{
-			if(rank2 == rank3)
-			{
-				if(rank3 == rank4)
-				{
-					returnValue = data->Full_House[rank3];
-				}
-				else if(rank1 == rank2)
-				{
-					returnValue = data->Quads[rank0];
-				}
-				else
-				{
-					returnValue = data->Two_Pair[rank2,rank0,rank4];
-				}
-			}
-			else if(rank3 == rank4)
-			{
-				if(rank1 == rank2)
-				{
-					returnValue = data->Full_House[rank0];
-				}
-				else
-				{
-					returnValue = data->Two_Pair[rank4,rank0,rank2];
-				}
-			}
-			else if(rank1 == rank2)
-			{
-				returnValue = data->Trips[rank0];
-			}
-			else
-			{
-				returnValue = data->Pair[rank0,rank4,rank3,rank2];
-			}
-		}
-		else if(rank1 == rank2)
-		{
-			if(rank3 == rank4)
-			{
-				if(rank2 == rank3)
-				{
-					returnValue = data->Quads[rank1];
-				}
-				else
-				{
-					returnValue = data->Two_Pair[rank3,rank1,rank0];
-				}
-			}
-			else if(rank2 == rank3)
-			{
-				returnValue = data->Trips[rank1];
-			}
-			else
-			{
-				returnValue = data->Pair[rank1,rank4,rank3,rank0];
-			}
-		}
-		else if(rank2 == rank3)
-		{
-			if(rank3 == rank4)
-			{
-				returnValue = data->Trips[rank2];
-			}
-			else
-			{
-				returnValue = data->Pair[rank2,rank4,rank1,rank0];
-			}
-		}
-		else
-		{
-			returnValue = data->Pair[rank3,rank2,rank1,rank0];
-		}
-	}
-	return returnValue;
-}
-*/
-
-#pragma endregion
-/*
-void Brain::Learn(void)
-{
-	float rankValue;
-	float offset = 0;
-	float inc = 0.0000005f;
-	
-	float HCval = 0.0f;
-	float Pval = 0.1f;
-	float TPval = 0.2f;
-	float Tval = 0.3f;
-	float Sval = 0.4f;
-	float Fval = 0.5f;
-	float FHval = 0.7f;
-	float Qval = 0.9f;
-	float SFval = 0.98f;
-
-	float LowHCval = 0.9f;
-	float LowPval = 0.1f;
-	float LowTPval = 0.07f;
-	float LowTval = 0.06f;
-	float LowSval = 0.05f;
-	float LowFval = 0.04f;
-	float LowFHval = 0.03f;
-	float LowQval = 0.02f;
-	float LowSFval = 0.01f;
-
-	for(int i = 0; i < 13; i++)
-	{
-		for(int j = 0; j < 13; j++)
-		{
-			for(int k = 0; k < 13; k++)
-			{
-				//continue;
-				// 3 card hands
-				if(i == j && j == k)
-				{
-					rankValue = 0.8f + 0.015f * offset;
-				}
-				else if(i == j)
-				{
-					rankValue = 0.1f + 0.05f * j + 0.001f * k;
-				}
-				else if(j == k)
-				{
-					rankValue = 0.1f + 0.05f * j + 0.001f * i;
-				}
-				else if(i == k)
-				{
-					rankValue = 0.1f + 0.05f * i + 0.001f * j;
-				}
-				else if(i > j && j > k)
-				{
-					rankValue = 0.005f * i + 0.0001f * j + 0.000005f * k;
-				}
-				dbHigh->Small->All[i,j,k] = rankValue;
-				dbLow->Small->All[i,j,k] = rankValue;
-				offset += inc;
-			}
-		}
-	}
-	
-	offset = 0;	
-	for(int i = 0; i < 12; i++)
-		for(int j = i; j < 13+i; j++)
-			for(int k = j; k < 13; k++)
-				for(int l = k; l < 13; l++)
-					for(int m = l; m < 13; m++)
-					{	
-						bool isStraight = j+1==k && k+1==l && l+1==m && (i+1==j || (i==12 && j==0));
-						if(i==j)
-						{
-							if(j==k)
-							{
-								if(k==l)
-									rankValue = Qval;
-								else
-									rankValue = (l==m ? FHval : Tval);
-							}
-							else if(k==l)
-								rankValue = (l==m ? FHval : TPval);
-							else
-								rankValue = (l==m ? TPval : Pval);
-
-						}
-						else if(j==k)
-						{
-							if(k==l)
-								rankValue = (l==m ? Qval : Tval);
-							else if(l==m)
-								rankValue = TPval;
-						}
-						else if(k==l)
-						{
-							rankValue = (l==m ? Tval : Pval);
-						}
-						else if(l==m)
-						{
-							rankValue = Pval;
-						}
-						else
-						{
-							rankValue = isStraight ? Sval : HCval;
-						}
-
-						//dbHigh->Middle->Flush[i,j,k,l,m] = ((i==j || j==k || k==l || l==m) ? 0 : (isStraight ? SFval : Fval)) + offset;
-						//dbHigh->Middle->Other[i,j,k,l,m] = rankValue + offset;
-						dbHigh->High->Flush[i,j,k,l,m] = ((i==j || j==k || k==l || l==m) ? 0 : (isStraight ? SFval : Fval)) + offset;
-						dbHigh->High->Other[i,j,k,l,m] = rankValue + offset;
-						//dbLow->High->Flush[i,j,k,l,m] = ((i==j || j==k || k==l || l==m) ? 0 : (isStraight ? SFval : Fval)) + offset;
-						//dbLow->High->Other[i,j,k,l,m] = rankValue + offset;
-						//dbLow->Middle->Flush[i,j,k,l,m] = (i==j || j==k || k==l || l==m) ? 0 : (1 - (isStraight?SFval:Fval) + offset) * 0.01f;
-						//dbLow->Middle->Other[i,j,k,l,m] = (1 - rankValue) + offset;
-
-						offset += inc;
-						
-						//dbHigh->High->Other[i,j,k,l,m] = HCval + offset;
-						//dbLow->High->Other[i,j,k,l,m] = HCval + offset;
-						//dbLow->Middle->Other[i,j,k,l,m] = LowHCval - 10*offset;
-						//dbHigh->High->Flush[i,j,k,l,m] = Fval + offset;
-						//dbHigh->Middle->Flush[i,j,k,l,m] = Fval + offset;
-						//dbLow->High->Flush[i,j,k,l,m] = Fval + offset;
-						//dbLow->Middle->Flush[i,j,k,l,m] = LowFval - offset/100;
-					}
-}
-*/

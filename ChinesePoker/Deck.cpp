@@ -15,18 +15,18 @@ Deck::Deck(int _size)
 
 		switch(i%4)
 		{
-		case(0):
-			cards[i] |= 0x1;
-			break;
-		case(1):
-			cards[i] |= 0x2;
-			break;
-		case(2):
-			cards[i] |= 0x4;
-			break;
-		case(3):
-			cards[i] |= 0x8;
-			break;
+			case(0):
+				cards[i] |= 0x1;
+				break;
+			case(1):
+				cards[i] |= 0x2;
+				break;
+			case(2):
+				cards[i] |= 0x4;
+				break;
+			case(3):
+				cards[i] |= 0x8;
+				break;
 		}
 	}
 }
@@ -64,17 +64,17 @@ int Deck::GetCondensedID(int index)
 	index <<= 2;
 	switch(suit)
 	{
-	case(0x1):
-		break;
-	case(0x2):
-		index |= 0x1;
-		break;
-	case(0x4):
-		index |= 0x2;
-		break;
-	case(0x8):
-		index |= 0x3;
-		break;
+		case(0x1):
+			break;
+		case(0x2):
+			index |= 0x1;
+			break;
+		case(0x4):
+			index |= 0x2;
+			break;
+		case(0x8):
+			index |= 0x3;
+			break;
 	}
 	return index & 0x3F;
 }
